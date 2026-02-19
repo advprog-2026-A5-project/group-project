@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "staging" ]
+  pull_request:
+    branches: [ "main", "staging" ]
+
+jobs:
+  # Continuous Integration
+  buildAndTest:
+    name: Run tests and code quality
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "gradle"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run unit tests and checkstyle linter
+        run: ./gradlew test check
+
+  #  Dummy Continuous Deployment
+
+  dummy-deploy:
+    needs: buildAndTest
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Quality Gate
+        run: echo "Quality Gate Passed! Tests and Linter are clean."
+
+      - name: Simulate Deployment to Staging
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          echo "Simulating deployment to STAGING Environment..."
+          echo "Connecting to Server... [MOCK]"
+          echo "Deployment Success!"
+
+      - name: Simulate Deployment to Production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Simulating deployment to PRODUCTION Environment..."
+          echo "Connecting to Server... [MOCK]"
+          echo "Deployment Success!"
