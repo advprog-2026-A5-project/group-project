@@ -12,52 +12,123 @@ jobs:
     steps:
       - name: Check out the Git repository
         uses: actions/checkout@v4
-
       - name: Set up Java toolchain
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "21"
           cache: "gradle"
+      - name: Make gradlew executable
+        working-directory: ./apps/backend/
+        run: chmod +x ./gradlew
+      - name: Run unit tests and checkstyle linter
+        working-directory: ./apps/backend/
+        run: ./gradlew build
+
+  security-analysis:
+    name: Scorecard analysis
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: "Run analysis"
+        uses: ossf/scorecard-action@f49aabe0b5af0936a0987cfb85d86b75731b0186 # v2.4.1
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: results.sarif
+          category: scorecards
+
+  backend-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
       - name: Make gradlew executable
+        working-directory: ./apps/backend/
         run: chmod +x ./gradlew
 
-      - name: Run unit tests and checkstyle linter
-        run: ./gradlew test check
       - name: Build and Analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_PROJECT_KEY: 'advprog-2026-A5-project_group-project'
-          GITHUB_HEAD_REF: ''
-          GITHUB_BASE_REF: ''
-          GITHUB_PR_NUMBER: ''
-          GITHUB_REF: 'refs/heads/main'
-        run:
-          ./gradlew build sonar \
-            -Dsonar.organization=advprog-2026-a5-project \
-            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-            -Dsonar.qualitygate.wait=true
+        working-directory: apps/backend/
+        run: ./gradlew check jacocoTestReport
 
-      - name: Generate SonarQube HTML Report
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          # Use npx to run the tool directly without needing a separate install step
-          npx sonar-report \
-            --sonarurl="$SONAR_HOST_URL" \
-            --sonarcomponent="$SONAR_PROJECT_KEY" \
-            --sonartoken="$SONAR_TOKEN" \
-            --allbugs="true" \
-            --output="sonar-analysis-report.html"
-
-      - name: Upload HTML Report as Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload SpotBugs SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: sonarqube-report
-          path: sonar-analysis-report.html
+          sarif_file: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
+          category: spotbugs-backend
+
+      - name: Checkstyle PR Reviewer
+        uses: dbelyaev/action-checkstyle@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: JaCoCo PR Report
+        if: github.event_name == 'pull_request'
+        uses: Madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ github.workspace }}/apps/backend/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          title: 'Backend Test Coverage'
+
+  frontend-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: ${{ github.workspace }}/apps/frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ${{ github.workspace }}/apps/frontend
+        run: |
+          npm install --no-audit --no-fund --no-save @microsoft/eslint-formatter-sarif
+          npx eslint . --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+        continue-on-error: true
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: SARIF file
+          path: ${{ github.workspace }}/apps/frontend/eslint-results.sarif
+          retention-days: 5
+      - name: Upload ESLint SARIF
+        uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6
+        with:
+          sarif_file: ${{ github.workspace }}/apps/frontend/eslint-results.sarif
+          category: eslint-frontend
 
   dummy-deploy:
     needs: buildAndTest
