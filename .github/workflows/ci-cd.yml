@@ -12,52 +12,98 @@ jobs:
     steps:
       - name: Check out the Git repository
         uses: actions/checkout@v4
-
       - name: Set up Java toolchain
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "21"
           cache: "gradle"
-
       - name: Make gradlew executable
         working-directory: ./apps/backend/
         run: chmod +x ./gradlew
-
       - name: Run unit tests and checkstyle linter
         working-directory: ./apps/backend/
-        run: ./gradlew test check
-      - name: Build and Analyze
-        working-directory: ./apps/backend/
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_PROJECT_KEY: 'advprog-2026-A5-project_group-project'
-          GITHUB_HEAD_REF: ''
-          GITHUB_BASE_REF: ''
-          GITHUB_PR_NUMBER: ''
-          GITHUB_REF: 'refs/heads/main'
-        run:
-          ./gradlew build sonar -Dsonar.organization=advprog-2026-a5-project -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.qualitygate.wait=true
+        run: ./gradlew build
 
-      - name: Generate SonarQube HTML Report
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          # Use npx to run the tool directly without needing a separate install step
-          npx sonar-report \
-            --sonarurl="$SONAR_HOST_URL" \
-            --sonarcomponent="$SONAR_PROJECT_KEY" \
-            --sonartoken="$SONAR_TOKEN" \
-            --allbugs="true" \
-            --output="sonar-analysis-report.html"
-
-      - name: Upload HTML Report as Artifact
-        uses: actions/upload-artifact@v4
+  security-scorecards:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run OpenSSF Scorecard
+        uses: ossf/scorecard-action@v2.4.0
         with:
-          name: sonarqube-report
-          path: sonar-analysis-report.html
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - name: Upload Scorecard SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+  backend-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build and Analyze
+        working-directory: apps/backend/
+        run: ./gradlew check jacocoTestReport
+
+      - name: Upload SpotBugs SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: apps/backend/build/reports/spotbugs/main.sarif
+
+      - name: Checkstyle PR Reviewer
+        uses: dbelyaev/action-checkstyle@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: JaCoCo PR Report
+        if: github.event_name == 'pull_request'
+        uses: Madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ github.workspace }}/apps/backend/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          title: 'Backend Test Coverage'
+
+  frontend-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: ./apps/frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./apps/frontend
+        run: |
+          npm install @microsoft/eslint-formatter-sarif
+          npx eslint . --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+        continue-on-error: true
+
+      - name: Upload ESLint SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./apps/frontend/eslint-results.sarif
 
   dummy-deploy:
     needs: buildAndTest
