@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.mysawit.model.User;
 import id.ac.ui.cs.advprog.mysawit.repository.UserRepository;
 import id.ac.ui.cs.advprog.mysawit.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
