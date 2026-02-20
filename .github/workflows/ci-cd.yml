@@ -55,6 +55,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+          category: scorecards
 
   backend-analysis:
     runs-on: ubuntu-latest
@@ -81,6 +82,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
+          category: spotbugs-backend
 
       - name: Checkstyle PR Reviewer
         uses: dbelyaev/action-checkstyle@v3
@@ -121,6 +123,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ github.workspace }}/apps/frontend/eslint-results.sarif
+          category: eslint-frontend
 
   dummy-deploy:
     needs: buildAndTest
