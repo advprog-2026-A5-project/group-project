@@ -1,26 +1,26 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { defineConfig, globalIgnores } from "eslint/config";
-import { FlatCompat } from "@eslint/eslintrc";
+import pluginNext from "@next/eslint-plugin-next";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+export default [
+    // 1. Global Ignores
+    {
+        ignores: [
+            ".next/**",
+            "out/**",
+            "build/**",
+            "next-env.d.ts",
+            "eslint-results.sarif" // Ignore your CI artifacts!
+        ],
+    },
 
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-});
-
-
-const eslintConfig = defineConfig([
-    ...compat.extends('next/core-web-vitals', 'next/typescript'),
-    // Override default ignores of eslint-config-next.
-    globalIgnores([
-        // Default ignores of eslint-config-next:
-        ".next/**",
-        "out/**",
-        "build/**",
-        "next-env.d.ts",
-    ]),
-]);
-
-export default eslintConfig;
+    // 2. Next.js Core Web Vitals Rules
+    {
+        files: ["**/*.{js,jsx,ts,tsx}"],
+        plugins: {
+            "@next/next": pluginNext,
+        },
+        rules: {
+            ...pluginNext.configs.recommended.rules,
+            ...pluginNext.configs["core-web-vitals"].rules,
+        },
+    },
+];
