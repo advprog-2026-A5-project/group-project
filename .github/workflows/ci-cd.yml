@@ -38,10 +38,7 @@ jobs:
           GITHUB_PR_NUMBER: ''
           GITHUB_REF: 'refs/heads/main'
         run:
-          ./gradlew build sonar \
-            -Dsonar.organization=advprog-2026-a5-project \
-            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-            -Dsonar.qualitygate.wait=true
+          ./gradlew build sonar -Dsonar.organization=advprog-2026-a5-project -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.qualitygate.wait=true
 
       - name: Generate SonarQube HTML Report
         env:
