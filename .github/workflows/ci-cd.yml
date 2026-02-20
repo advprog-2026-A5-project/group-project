@@ -2,9 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "staging" ]
   pull_request:
-    branches: [ "main", "staging" ]
 
 jobs:
   # Continuous Integration
@@ -27,8 +25,39 @@ jobs:
 
       - name: Run unit tests and checkstyle linter
         run: ./gradlew test check
+      - name: Build and Analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_KEY: 'advprog-2026-A5-project_group-project'
+          GITHUB_HEAD_REF: ''
+          GITHUB_BASE_REF: ''
+          GITHUB_PR_NUMBER: ''
+          GITHUB_REF: 'refs/heads/main'
+        run:
+          ./gradlew build sonar \
+            -Dsonar.organization=advprog-2026-a5-project \
+            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+            -Dsonar.qualitygate.wait=true
 
-  #  Dummy Continuous Deployment
+      - name: Generate SonarQube HTML Report
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          # Use npx to run the tool directly without needing a separate install step
+          npx sonar-report \
+            --sonarurl="$SONAR_HOST_URL" \
+            --sonarcomponent="$SONAR_PROJECT_KEY" \
+            --sonartoken="$SONAR_TOKEN" \
+            --allbugs="true" \
+            --output="sonar-analysis-report.html"
+
+      - name: Upload HTML Report as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-report
+          path: sonar-analysis-report.html
 
   dummy-deploy:
     needs: buildAndTest
