@@ -24,7 +24,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/auth/signin", {
+            const response = await fetch("/api/auth/signin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,19 +35,25 @@ export default function LoginPage() {
                 }),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                const data = await response.json();
-                // Simpan token atau data user di sini jika ada (misal di localStorage)
-                console.log("Login Berhasil:", data);
+                // SIMPAN JWT TOKEN
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                } else if (data.accessToken) {
+                    localStorage.setItem("token", data.accessToken);
+                }
+
+                console.log("Login Berhasil, Token disimpan.");
                 alert("Selamat Datang di MySawit!");
-                router.push("/dashboard"); // Redirect ke halaman utama setelah login
+                router.push("/dashboard");
             } else {
-                const errorData = await response.json();
-                alert(`Gagal Masuk: ${errorData.message || "Username atau password salah"}`);
+                alert(`Gagal Masuk: ${data.message || "Username atau password salah"}`);
             }
         } catch (error) {
             console.error("Network Error:", error);
-            alert("Koneksi gagal! Pastikan backend MySawit sudah jalan di port 8080.");
+            alert("Koneksi gagal! Pastikan backend sudah jalan dan Proxy Next.js sudah dikonfigurasi.");
         } finally {
             setLoading(false);
         }
@@ -55,7 +61,6 @@ export default function LoginPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#FDF8F3] px-4">
-            {}
             <div className="absolute top-0 left-0 w-full h-2 bg-[#8B4513]" />
 
             <div className="w-full max-w-md">
@@ -68,7 +73,6 @@ export default function LoginPage() {
 
                     <div className="p-8">
                         <form className="space-y-6" onSubmit={handleLogin}>
-                            {/* Input Username */}
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-[#5D2E0B] ml-1">Username</label>
                                 <input
@@ -82,7 +86,6 @@ export default function LoginPage() {
                                 />
                             </div>
 
-                            {/* Input Password */}
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center ml-1">
                                     <label className="text-sm font-bold text-[#5D2E0B]">Password</label>
