@@ -1,8 +1,11 @@
+import com.github.spotbugs.snom.SpotBugsTask
+
 plugins {
     java
     jacoco
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
+    id("com.github.spotbugs") version "6.4.8"
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -13,6 +16,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+spotbugs {
+
 }
 
 configurations {
@@ -37,4 +44,21 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<SpotBugsTask> {
+    reports {
+        create("sarif") {
+            required.set(true)
+        }
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports.xml.required.set(true)
 }
