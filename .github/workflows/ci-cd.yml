@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload SpotBugs SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
           category: spotbugs-backend
@@ -120,7 +120,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload ESLint SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ github.workspace }}/apps/frontend/eslint-results.sarif
           category: eslint-frontend
