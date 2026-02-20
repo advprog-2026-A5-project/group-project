@@ -21,11 +21,14 @@ jobs:
           cache: "gradle"
 
       - name: Make gradlew executable
-        run: chmod +x ./apps/backend/gradlew
+        working-directory: ./apps/backend/
+        run: chmod +x ./gradlew
 
       - name: Run unit tests and checkstyle linter
-        run: ./apps/backend/gradlew test check
+        working-directory: ./apps/backend/
+        run: ./gradlew test check
       - name: Build and Analyze
+        working-directory: ./apps/backend/
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -35,7 +38,7 @@ jobs:
           GITHUB_PR_NUMBER: ''
           GITHUB_REF: 'refs/heads/main'
         run:
-          ./apps/backend/gradlew build sonar \
+          ./gradlew build sonar \
             -Dsonar.organization=advprog-2026-a5-project \
             -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
             -Dsonar.qualitygate.wait=true
