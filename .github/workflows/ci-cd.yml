@@ -113,7 +113,7 @@ jobs:
       - name: Run ESLint
         working-directory: ${{ github.workspace }}/apps/frontend
         run: |
-          npm install @microsoft/eslint-formatter-sarif
+          npm install --no-save @microsoft/eslint-formatter-sarif
           npx eslint . --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
         continue-on-error: true
 
