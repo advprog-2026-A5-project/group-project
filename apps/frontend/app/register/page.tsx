@@ -31,7 +31,7 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/auth/signup", {
+            const response = await fetch("/api/auth/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -42,16 +42,21 @@ export default function RegisterPage() {
                 }),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                alert("Registrasi Berhasil! Silakan Login.");
-                router.push("/login"); // Otomatis pindah ke halaman login
+                if (data.token || data.accessToken) {
+                    localStorage.setItem("token", data.token || data.accessToken);
+                }
+
+                alert("Registrasi Berhasil!");
+                router.push("/login");
             } else {
-                const errorData = await response.json();
-                alert(`Gagal: ${errorData.message || "Terjadi kesalahan pada server"}`);
+                alert(`Gagal: ${data.message || "Terjadi kesalahan pada server"}`);
             }
         } catch (error) {
             console.error("Error pas manggil API:", error);
-            alert("Tidak bisa terhubung ke server. Pastikan backend di localhost:8080 nyala!");
+            alert("Koneksi gagal! Pastikan backend nyala dan proxy di next.config.ts sudah benar.");
         } finally {
             setLoading(false);
         }
@@ -71,7 +76,6 @@ export default function RegisterPage() {
 
                     <div className="p-8">
                         <form className="space-y-5" onSubmit={handleRegister}>
-                            {/* Username - sesuai field DB */}
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-[#5D2E0B] ml-1">Username</label>
                                 <input
@@ -85,7 +89,6 @@ export default function RegisterPage() {
                                 />
                             </div>
 
-                            {/* Password */}
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-[#5D2E0B] ml-1">Password</label>
                                 <input
@@ -99,7 +102,6 @@ export default function RegisterPage() {
                                 />
                             </div>
 
-                            {/* Confirm Password */}
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-[#5D2E0B] ml-1">Konfirmasi Password</label>
                                 <input
@@ -141,6 +143,9 @@ export default function RegisterPage() {
                         </div>
                     </div>
                 </div>
+                <p className="text-center mt-8 text-xs text-[#8B4513]/50 font-medium">
+                    &copy; 2026 MySawit Indonesia
+                </p>
             </div>
         </div>
     );
