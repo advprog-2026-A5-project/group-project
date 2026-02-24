@@ -10,6 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -21,8 +25,9 @@ public class AuthController {
     PasswordEncoder encoder;
     @Autowired
     JwtUtil jwtUtils;
+
     @PostMapping("/signin")
-    public String authenticateUser(@RequestBody User user) {
+    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getUsername(),
@@ -30,12 +35,14 @@ public class AuthController {
                 )
         );
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtUtils.generateToken(userDetails.getUsername());
+        String jwt = jwtUtils.generateToken(userDetails.getUsername());
+
+        return ResponseEntity.ok(Map.of("token", jwt));
     }
     @PostMapping("/signup")
-    public String registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            return "Error: Username is already taken!";
+            return ResponseEntity.badRequest().body(Map.of("message", "Error: Username is already taken!"));
         }
         // Create new user's account
         User newUser = new User(
@@ -44,6 +51,7 @@ public class AuthController {
                 encoder.encode(user.getPassword())
         );
         userRepository.save(newUser);
-        return "User registered successfully!";
+
+        return ResponseEntity.ok(Map.of("message", "User registered successfully!"));
     }
 }
