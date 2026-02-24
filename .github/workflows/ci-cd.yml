@@ -84,6 +84,13 @@ jobs:
           sarif_file: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
           category: spotbugs-backend
 
+      - name: "Upload SpotBugs SARIF artifact"
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: SpotBugs SARIF
+          path: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
+          retention-days: 5
+
       - name: JaCoCo PR Report
         if: github.event_name == 'pull_request'
         uses: Madrapps/jacoco-report@v1.6.1
