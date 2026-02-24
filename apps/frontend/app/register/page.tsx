@@ -71,6 +71,7 @@ export default function RegisterPage() {
 
                     <div className="bg-[#8B4513] p-8 text-center">
                         <h2 className="text-3xl font-extrabold text-white tracking-tight">MySawit</h2>
+                        <img src="/logo.png" alt="Logo" />
                         <p className="text-[#FDF8F3]/80 text-sm mt-2 font-medium">Buat akun baru untuk mulai memantau</p>
                     </div>
 
@@ -118,9 +119,8 @@ export default function RegisterPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full bg-[#D2691E] hover:bg-[#8B4513] text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98] mt-4 ${
-                                    loading ? "opacity-50 cursor-not-allowed" : ""
-                                }`}
+                                className={`w-full bg-[#D2691E] hover:bg-[#8B4513] text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98] mt-4 ${loading ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
                             >
                                 {loading ? "MENGIRIM..." : "DAFTAR SEKARANG"}
                             </button>
