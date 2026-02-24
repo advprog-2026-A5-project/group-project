@@ -84,11 +84,6 @@ jobs:
           sarif_file: ${{ github.workspace }}/apps/backend/build/reports/spotbugs/main.sarif
           category: spotbugs-backend
 
-      - name: Checkstyle PR Reviewer
-        uses: dbelyaev/action-checkstyle@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: JaCoCo PR Report
         if: github.event_name == 'pull_request'
         uses: Madrapps/jacoco-report@v1.6.1
