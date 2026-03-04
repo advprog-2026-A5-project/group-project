@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.mysawit.controller;
 import id.ac.ui.cs.advprog.mysawit.dto.KebunRequestDTO;
 import id.ac.ui.cs.advprog.mysawit.model.Kebun;
 import id.ac.ui.cs.advprog.mysawit.service.KebunService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,8 @@ import java.util.List;
 @RequestMapping("/api/kebun")
 public class KebunController {
 
-    private final KebunService kebunService;
-
-    public KebunController(KebunService kebunService) {
-        this.kebunService = kebunService;
-    }
+    @Autowired
+    private KebunService kebunService;
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody KebunRequestDTO request) {
