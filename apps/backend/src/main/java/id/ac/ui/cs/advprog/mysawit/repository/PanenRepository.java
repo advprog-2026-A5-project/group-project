@@ -10,7 +10,8 @@ import java.util.List;
 
 @Repository
 public interface PanenRepository extends JpaRepository<Panen, Long> {
-    boolean existLaporanByBuruhAndTanggalPanen(
+    //Sudah di lapor hari itu belom
+    boolean existsByBuruhAndTanggalPanenBetween(
         User buruh,
         LocalDateTime startOfDay,
         LocalDateTime endOfDay
@@ -18,12 +19,12 @@ public interface PanenRepository extends JpaRepository<Panen, Long> {
 
     List<Panen> findByBuruh(User buruh);
 
-    List<Panen> findByBuruhbetweenTanggal(
+    List<Panen> findByBuruhAndTanggalPanenBetweenOrderByTanggalPanenDesc(
         User buruh,
         LocalDateTime startDate,
         LocalDateTime endDate
     );
 
-    List<Panen> findBystatus(StatusPanen status);
+    List<Panen> findByStatusOrderByTanggalPanenDesc(StatusPanen status);
 }
 
