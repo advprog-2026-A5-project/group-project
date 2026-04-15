@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.mysawit.controller;
 
+import id.ac.ui.cs.advprog.mysawit.dto.AssignRequestDTO;
 import id.ac.ui.cs.advprog.mysawit.dto.KebunRequestDTO;
+import id.ac.ui.cs.advprog.mysawit.dto.ReassignRequestDTO;
 import id.ac.ui.cs.advprog.mysawit.model.Kebun;
 import id.ac.ui.cs.advprog.mysawit.service.KebunService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,10 @@ public class KebunController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Kebun>> getAll() {
-        return ResponseEntity.ok(kebunService.findAll());
+    public ResponseEntity<List<Kebun>> getAll(
+            @RequestParam(required = false) String nama,
+            @RequestParam(required = false) String kodeKebun) {
+        return ResponseEntity.ok(kebunService.findAll(nama, kodeKebun));
     }
 
     @GetMapping("/{id}")
@@ -56,7 +60,49 @@ public class KebunController {
             kebunService.delete(id);
             return ResponseEntity.ok("Kebun berhasil dihapus");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ========== ASSIGN / UNASSIGN ENDPOINTS ==========
+
+    @PutMapping("/{id}/assign-mandor")
+    public ResponseEntity<?> assignMandor(@PathVariable Long id, @RequestBody AssignRequestDTO request) {
+        try {
+            Kebun kebun = kebunService.assignMandor(id, request.getName());
+            return ResponseEntity.ok(kebun);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/assign-supir")
+    public ResponseEntity<?> assignSupir(@PathVariable Long id, @RequestBody AssignRequestDTO request) {
+        try {
+            Kebun kebun = kebunService.assignSupir(id, request.getName());
+            return ResponseEntity.ok(kebun);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/unassign-mandor")
+    public ResponseEntity<?> unassignMandor(@PathVariable Long id, @RequestBody ReassignRequestDTO request) {
+        try {
+            Kebun kebun = kebunService.unassignMandor(id, request.getTargetKebunId());
+            return ResponseEntity.ok(kebun);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/unassign-supir")
+    public ResponseEntity<?> unassignSupir(@PathVariable Long id, @RequestBody ReassignRequestDTO request) {
+        try {
+            Kebun kebun = kebunService.unassignSupir(id, request.getSupirName(), request.getTargetKebunId());
+            return ResponseEntity.ok(kebun);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
