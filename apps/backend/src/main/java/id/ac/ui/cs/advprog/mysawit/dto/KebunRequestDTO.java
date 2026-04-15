@@ -6,5 +6,7 @@ import java.util.List;
 @Data
 public class KebunRequestDTO {
     private String nama;
+    private String kodeKebun;
+    private Double luas;
     private List<CoordinateDTO> koordinat;
 }
