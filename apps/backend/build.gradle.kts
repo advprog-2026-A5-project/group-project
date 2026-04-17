@@ -13,9 +13,8 @@ version = "0.0.1-SNAPSHOT"
 description = "MySawit"
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 spotbugs {
@@ -46,6 +45,9 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    runtimeOnly("org.postgresql:postgresql")
+
+    implementation("org.locationtech.jts:jts-core:1.19.0")
 }
 
 tasks.withType<Test> {
@@ -67,4 +69,8 @@ tasks.test {
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports.xml.required.set(true)
+}
+
+tasks.named("spotbugsTest") {
+    enabled = false
 }

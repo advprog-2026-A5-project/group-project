@@ -131,24 +131,38 @@ jobs:
           sarif_file: ${{ github.workspace }}/apps/frontend/eslint-results.sarif
           category: eslint-frontend
 
-  dummy-deploy:
+  deploy-to-ec2:
     needs: buildAndTest
-    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Check Quality Gate
-        run: echo "Quality Gate Passed! Tests and Linter are clean."
-
-      - name: Simulate Deployment to Staging
-        if: github.ref == 'refs/heads/staging'
-        run: |
-          echo "Simulating deployment to STAGING Environment..."
-          echo "Connecting to Server... [MOCK]"
-          echo "Deployment Success!"
-
-      - name: Simulate Deployment to Production
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Simulating deployment to PRODUCTION Environment..."
-          echo "Connecting to Server... [MOCK]"
-          echo "Deployment Success!"
+      - name: SSH and Deploy to Production
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            sudo dnf install git java-21-amazon-corretto -y
+            
+            # 2. Check if the folder exists
+            if [ ! -d "group-project" ]; then
+              echo "Repository not found. Cloning for the first time..."
+              git clone https://github.com/advprog-2026-A5-project/group-project.git
+              cd group-project
+            else
+              echo "Repository exists. Pulling latest changes..."
+              cd group-project
+              git pull origin main
+            fi
+            
+            cd apps/backend
+            chmod +x gradlew
+            
+            # GitHub already ran the tests in the 'buildAndTest'
+            ./gradlew clean bootJar -x test
+            
+            sudo pkill -f 'java -jar' || true
+            nohup java -jar build/libs/*.jar > app.log 2>&1 &
+            echo "Deployment successful!"
