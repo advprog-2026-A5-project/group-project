@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 
 interface Kebun {
   id: number;
@@ -206,7 +207,7 @@ export default function DashboardPage() {
             onChange={(e) => setSearchKode(e.target.value)}
             className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 w-32 outline-none focus:ring-2 focus:ring-[#D2691E]"
           />
-          <a
+          <Link
             href="/dashboard/kebun/create"
             className="px-6 py-3 bg-gradient-to-r from-[#D2691E] to-[#8B4513] text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
           >
@@ -214,7 +215,7 @@ export default function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Tambah Kebun
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -228,12 +229,12 @@ export default function DashboardPage() {
           <p className="text-[#8B6F5A] mb-6">
             Mulai dengan menambahkan kebun pertama Anda
           </p>
-          <a
+          <Link
             href="/dashboard/kebun/create"
             className="inline-block px-6 py-3 bg-[#D2691E] text-white font-bold rounded-xl hover:bg-[#8B4513] transition-colors"
           >
             Tambah Kebun Pertama
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-[#EEDDCC]">
@@ -268,12 +269,12 @@ export default function DashboardPage() {
                       #{kebun.id}
                     </td>
                     <td className="px-6 py-4">
-                      <a
+                      <Link
                         href={`/dashboard/kebun/${kebun.id}`}
                         className="text-[#3D1C00] font-semibold hover:text-[#D2691E] transition-colors"
                       >
                         {kebun.nama}
-                      </a>
+                      </Link>
                     </td>
                     <td className="px-6 py-4">
                       {kebun.mandorName ? (
@@ -334,23 +335,22 @@ export default function DashboardPage() {
                         </button>
 
                         {/* Edit */}
-                        <a
+                        <Link
                           href={`/dashboard/kebun/${kebun.id}/edit`}
                           className="px-3 py-1.5 text-xs font-semibold bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
                         >
                           Edit
-                        </a>
+                        </Link>
 
                         {/* Delete */}
                         <button
                           onClick={() => handleDelete(kebun.id)}
                           disabled={!!kebun.mandorName}
                           title={kebun.mandorName ? "Tidak bisa dihapus (Mandor terikat)" : "Hapus kebun"}
-                          className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
-                            kebun.mandorName
-                              ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                              : "bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
-                          }`}
+                          className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${kebun.mandorName
+                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                            : "bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
+                            }`}
                         >
                           Hapus
                         </button>
@@ -444,11 +444,10 @@ export default function DashboardPage() {
                 <button
                   onClick={handleModalSubmit}
                   disabled={modalLoading || !canSubmit}
-                  className={`flex-1 py-3 bg-[#8B4513] text-white font-bold rounded-xl shadow-lg transition-all ${
-                    modalLoading || !canSubmit
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-[#703810] active:scale-[0.98]"
-                  }`}
+                  className={`flex-1 py-3 bg-[#8B4513] text-white font-bold rounded-xl shadow-lg transition-all ${modalLoading || !canSubmit
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#703810] active:scale-[0.98]"
+                    }`}
                 >
                   {modalLoading ? "Memproses..." : "Simpan"}
                 </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function DashboardLayout({
   children,
@@ -55,7 +56,7 @@ export default function DashboardLayout({
 
         {/* Nav Items */}
         <nav className="flex-1 p-4 space-y-2">
-          <a
+          <Link
             href="/dashboard"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-medium"
           >
@@ -63,8 +64,8 @@ export default function DashboardLayout({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
             {sidebarOpen && <span>Daftar Kebun</span>}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/dashboard/kebun/create"
             className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-medium text-white/70 hover:text-white"
           >
@@ -72,7 +73,7 @@ export default function DashboardLayout({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             {sidebarOpen && <span>Tambah Kebun</span>}
-          </a>
+          </Link>
         </nav>
 
         {/* Toggle + Logout */}
