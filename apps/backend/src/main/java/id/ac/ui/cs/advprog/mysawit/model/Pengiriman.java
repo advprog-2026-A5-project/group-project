@@ -1,4 +1,6 @@
 package id.ac.ui.cs.advprog.mysawit.model;
+import id.ac.ui.cs.advprog.mysawit.enums.StatusPengiriman;
+
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +19,7 @@ public class Pengiriman {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "driver_id", nullable = false)
@@ -28,7 +30,7 @@ public class Pengiriman {
     private User mandor;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShipmentItem> items;
+    private List<PengirimanItem> items;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
