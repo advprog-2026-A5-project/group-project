@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AssignDriverRequest {
-    private UUID driverId;
+    private Long driverId;
     private List<HarvestItemDto> harvestItems;
 
     @Getter
