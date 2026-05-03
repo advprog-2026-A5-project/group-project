@@ -33,23 +33,10 @@ public class UpahServiceImpl implements UpahService {
     @Override
     @Transactional
     public Upah update(UpahRequestDTO request) {
-        validateRequest(request);
         Upah existing = upahRepository.findByRole(request.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Upah untuk role tidak ditemukan"));
         existing.setUpahPerKg(request.getUpahPerKg());
         return upahRepository.save(existing);
-    }
-
-    private void validateRequest(UpahRequestDTO request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request body is required");
-        }
-        if (request.getRole() == null) {
-            throw new IllegalArgumentException("Role upah wajib diisi");
-        }
-        if (request.getUpahPerKg() == null || request.getUpahPerKg() <= 0) {
-            throw new IllegalArgumentException("Upah per kg wajib diisi dan lebih dari 0");
-        }
     }
 
     private void ensureRoleExists(UpahRole role) {

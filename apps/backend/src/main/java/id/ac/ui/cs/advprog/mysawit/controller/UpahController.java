@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.mysawit.dto.UpahRequestDTO;
 import id.ac.ui.cs.advprog.mysawit.dto.UpahResponseDTO;
 import id.ac.ui.cs.advprog.mysawit.model.Upah;
 import id.ac.ui.cs.advprog.mysawit.service.UpahService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class UpahController {
     @PutMapping
     public ResponseEntity<?> update(
             @RequestHeader("X-User-Role") String userRole,
-            @RequestBody UpahRequestDTO request) {
+            @Valid @RequestBody UpahRequestDTO request) {
         try {
             ensureRole(userRole, ROLE_ADMIN);
             Upah updated = upahService.update(request);

@@ -54,26 +54,12 @@ class UpahServiceImplTest {
     }
 
     @Test
-    void update_rejectsMissingRole() {
-        UpahRequestDTO request = new UpahRequestDTO();
-        request.setUpahPerKg(1000.0);
-
-        assertThrows(IllegalArgumentException.class, () -> upahService.update(request));
-    }
-
-    @Test
-    void update_rejectsMissingValue() {
+    void update_rejectsMissingRoleRecord() {
         UpahRequestDTO request = new UpahRequestDTO();
         request.setRole(UpahRole.BURUH);
+        request.setUpahPerKg(1000.0);
 
-        assertThrows(IllegalArgumentException.class, () -> upahService.update(request));
-    }
-
-    @Test
-    void update_rejectsNonPositiveValue() {
-        UpahRequestDTO request = new UpahRequestDTO();
-        request.setRole(UpahRole.SUPIR);
-        request.setUpahPerKg(0.0);
+        upahRepository.deleteAll();
 
         assertThrows(IllegalArgumentException.class, () -> upahService.update(request));
     }
